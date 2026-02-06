@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Creeper JS – Calculator Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #171a2e;
+      --accent: #5cff9d;
+      --text: #e8eaff;
+      --muted: #9aa0ff;
+      --error: #ff6b6b;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1b1f3a, var(--bg));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: none;
+      background: #0e1020;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    input::placeholder {
+      color: #6b70c9;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #5cff9d, #35e4ff);
+      color: #000;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(92, 255, 157, 0.35);
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: #0e1020;
+      font-size: 1rem;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      word-break: break-word;
+    }
+
+    .result.error {
+      color: var(--error);
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #6b70c9;
+    }
+
+    .footer span {
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>🧮 Creeper JS</h1>
+    <p>Drop-in JavaScript SDK demo. Type a math expression below.</p>
+
+    <input
+      id="expression"
+      type="text"
+      placeholder="e.g. 10 * (5 + 3)"
+    />
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div id="result" class="result">Result will appear here</div>
+
+    <div class="footer">
+      Powered by <span>Creeper JS</span>
+    </div>
+  </div>
+
+  <!-- Load Creeper JS SDK -->
+  <script src="https://raw.githubusercontent.com/CodingAxolotl/js-files/refs/heads/main/creeper.js"></script>
+
+  <script>
+    async function calculate() {
+      const input = document.getElementById("expression");
+      const resultBox = document.getElementById("result");
+
+      resultBox.classList.remove("error");
+      resultBox.textContent = "Calculating...";
+
+      try {
+        if (!window.creeper || !creeper.calculate) {
+          throw new Error("Creeper JS not loaded");
+        }
+
+        const result = await creeper.calculate(input.value);
+        resultBox.textContent = result;
+      } catch (err) {
+        resultBox.textContent = err.message;
+        resultBox.classList.add("error");
+      }
+    }
+  </script>
+</body>
+</html>
