@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Creeper JS – Calculator Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     :root {
@@ -15,10 +15,7 @@
       --error: #ff6b6b;
     }
 
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
 
     body {
       margin: 0;
@@ -36,20 +33,12 @@
       width: 100%;
       max-width: 420px;
       border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      text-align: center;
     }
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 1.6rem;
-      color: var(--accent);
-    }
-
-    p {
-      margin: 0 0 24px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
+    h1 { margin: 0 0 8px; font-size: 1.6rem; color: var(--accent); }
+    p { margin: 0 0 24px; color: var(--muted); font-size: 0.95rem; }
 
     input {
       width: 100%;
@@ -63,9 +52,7 @@
       margin-bottom: 16px;
     }
 
-    input::placeholder {
-      color: #6b70c9;
-    }
+    input::placeholder { color: #6b70c9; }
 
     button {
       width: 100%;
@@ -80,9 +67,11 @@
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    button:hover {
+    button:disabled { cursor: not-allowed; opacity: 0.6; }
+
+    button:hover:enabled {
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(92, 255, 157, 0.35);
+      box-shadow: 0 8px 20px rgba(92,255,157,0.35);
     }
 
     .result {
@@ -97,66 +86,63 @@
       word-break: break-word;
     }
 
-    .result.error {
-      color: var(--error);
-    }
+    .result.error { color: var(--error); }
 
-    .footer {
-      margin-top: 18px;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #6b70c9;
-    }
-
-    .footer span {
-      color: var(--accent);
-    }
+    .footer { margin-top: 18px; font-size: 0.8rem; color: #6b70c9; }
+    .footer span { color: var(--accent); }
   </style>
 </head>
 
 <body>
   <div class="card">
     <h1>🧮 Creeper JS</h1>
-    <p>Drop-in JavaScript SDK demo. Type a math expression below.</p>
+    <p>Type a math expression below and hit Calculate.</p>
 
-    <input
-      id="expression"
-      type="text"
-      placeholder="e.g. 10 * (5 + 3)"
-    />
-
-    <button onclick="calculate()">Calculate</button>
+    <input id="expression" type="text" placeholder="e.g. 10 * (5 + 3)" />
+    <button id="calculateBtn" disabled>Loading Creeper JS...</button>
 
     <div id="result" class="result">Result will appear here</div>
-
-    <div class="footer">
-      Powered by <span>Creeper JS</span>
-    </div>
+    <div class="footer">Powered by <span>Creeper JS</span></div>
   </div>
 
-  <!-- Load Creeper JS SDK -->
-  <script src="https://raw.githubusercontent.com/CodingAxolotl/js-files/refs/heads/main/creeper.js"></script>
-
   <script>
-    async function calculate() {
-      const input = document.getElementById("expression");
-      const resultBox = document.getElementById("result");
+    // Creeper JS URL
+    const creeperURL = "https://cdn.jsdelivr.net/gh/CodingAxolotl/js-files@refs/heads/main/creeper.js";
 
+    const calculateBtn = document.getElementById("calculateBtn");
+    const expressionInput = document.getElementById("expression");
+    const resultBox = document.getElementById("result");
+
+    // Dynamically load Creeper JS
+    const script = document.createElement("script");
+    script.src = creeperURL;
+    script.onload = () => {
+      calculateBtn.disabled = false;
+      calculateBtn.textContent = "Calculate";
+      console.log("Creeper JS loaded:", window.creeper);
+    };
+    script.onerror = () => {
+      resultBox.textContent = "Failed to load Creeper JS";
+      resultBox.classList.add("error");
+    };
+    document.head.appendChild(script);
+
+    async function calculate() {
       resultBox.classList.remove("error");
       resultBox.textContent = "Calculating...";
 
       try {
-        if (!window.creeper || !creeper.calculate) {
-          throw new Error("Creeper JS not loaded");
-        }
+        if (!window.creeper || !creeper.calculate) throw new Error("Creeper JS not loaded");
 
-        const result = await creeper.calculate(input.value);
+        const result = await creeper.calculate(expressionInput.value);
         resultBox.textContent = result;
       } catch (err) {
         resultBox.textContent = err.message;
         resultBox.classList.add("error");
       }
     }
+
+    calculateBtn.addEventListener("click", calculate);
   </script>
 </body>
 </html>
