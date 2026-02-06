@@ -40,7 +40,7 @@
     h1 { margin: 0 0 8px; font-size: 1.6rem; color: var(--accent); }
     p { margin: 0 0 24px; color: var(--muted); font-size: 0.95rem; }
 
-    input {
+    input[type=text] {
       width: 100%;
       padding: 14px 16px;
       border-radius: 10px;
@@ -53,6 +53,20 @@
     }
 
     input::placeholder { color: #6b70c9; }
+
+    label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    label input {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
 
     button {
       width: 100%;
@@ -68,11 +82,7 @@
     }
 
     button:disabled { cursor: not-allowed; opacity: 0.6; }
-
-    button:hover:enabled {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(92,255,157,0.35);
-    }
+    button:hover:enabled { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(92,255,157,0.35); }
 
     .result {
       margin-top: 20px;
@@ -99,6 +109,12 @@
     <p>Type a math expression below and hit Calculate.</p>
 
     <input id="expression" type="text" placeholder="e.g. 10 * (5 + 3)" />
+
+    <label>
+      <input type="checkbox" id="latexCheckbox">
+      LaTeX Code
+    </label>
+
     <button id="calculateBtn" disabled>Loading Creeper JS...</button>
 
     <div id="result" class="result">Result will appear here</div>
@@ -106,11 +122,11 @@
   </div>
 
   <script>
-    // Creeper JS URL
     const creeperURL = "https://cdn.jsdelivr.net/gh/CodingAxolotl/js-files@refs/heads/main/creeper.js";
 
     const calculateBtn = document.getElementById("calculateBtn");
     const expressionInput = document.getElementById("expression");
+    const latexCheckbox = document.getElementById("latexCheckbox");
     const resultBox = document.getElementById("result");
 
     // Dynamically load Creeper JS
@@ -127,6 +143,30 @@
     };
     document.head.appendChild(script);
 
+    // Simple LaTeX to JS math conversion
+    function latexToMath(expr) {
+      let converted = expr;
+
+      // Replace \frac{a}{b} with (a/b)
+      converted = converted.replace(/\\frac\s*{([^}]+)}{([^}]+)}/g, '($1/$2)');
+
+      // Replace \cdot with *
+      converted = converted.replace(/\\cdot/g, '*');
+
+      // Replace ^ with ** for powers
+      converted = converted.replace(/(\d+|\([^)]+\))\s*\^\s*(\d+|\([^)]+\))/g, '($1**$2)');
+
+      // Remove any remaining backslashes
+      converted = converted.replace(/\\/g, '');
+
+      return converted;
+    }
+
+    function formatNumber(num) {
+      if (typeof num !== "number") return num;
+      return num.toLocaleString();
+    }
+
     async function calculate() {
       resultBox.classList.remove("error");
       resultBox.textContent = "Calculating...";
@@ -134,8 +174,14 @@
       try {
         if (!window.creeper || !creeper.calculate) throw new Error("Creeper JS not loaded");
 
-        const result = await creeper.calculate(expressionInput.value);
-        resultBox.textContent = result;
+        let expr = expressionInput.value;
+
+        if (latexCheckbox.checked) {
+          expr = latexToMath(expr);
+        }
+
+        const result = await creeper.calculate(expr);
+        resultBox.textContent = formatNumber(result);
       } catch (err) {
         resultBox.textContent = err.message;
         resultBox.classList.add("error");
@@ -143,6 +189,13 @@
     }
 
     calculateBtn.addEventListener("click", calculate);
+
+    // Optional: allow Enter key
+    expressionInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter" && !calculateBtn.disabled) {
+        calculate();
+      }
+    });
   </script>
 </body>
 </html>
