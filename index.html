@@ -108,7 +108,7 @@
     <h1>🧮 Creeper JS</h1>
     <p>Type a math expression below and hit Calculate.</p>
 
-    <input id="expression" type="text" placeholder="e.g. 10 * (5 + 3)" />
+    <input id="expression" type="text" placeholder="e.g. 10 * (5 + 3) or LaTeX" />
 
     <label>
       <input type="checkbox" id="latexCheckbox">
@@ -129,7 +129,7 @@
     const latexCheckbox = document.getElementById("latexCheckbox");
     const resultBox = document.getElementById("result");
 
-    // Dynamically load Creeper JS
+    // Load Creeper JS dynamically
     const script = document.createElement("script");
     script.src = creeperURL;
     script.onload = () => {
@@ -143,25 +143,29 @@
     };
     document.head.appendChild(script);
 
-    // Simple LaTeX to JS math conversion
+    // Convert LaTeX expressions to normal JS math
     function latexToMath(expr) {
       let converted = expr;
 
       // Replace \frac{a}{b} with (a/b)
-      converted = converted.replace(/\\frac\s*{([^}]+)}{([^}]+)}/g, '($1/$2)');
+      // Handle nested fractions using a loop until none remain
+      while (/\\frac\s*{([^{}]+)}{([^{}]+)}/.test(converted)) {
+        converted = converted.replace(/\\frac\s*{([^{}]+)}{([^{}]+)}/g, '($1/$2)');
+      }
 
-      // Replace \cdot with *
-      converted = converted.replace(/\\cdot/g, '*');
+      // Replace \cdot and \times with *
+      converted = converted.replace(/\\cdot|\\times/g, '*');
 
       // Replace ^ with ** for powers
       converted = converted.replace(/(\d+|\([^)]+\))\s*\^\s*(\d+|\([^)]+\))/g, '($1**$2)');
 
-      // Remove any remaining backslashes
+      // Remove remaining backslashes
       converted = converted.replace(/\\/g, '');
 
       return converted;
     }
 
+    // Format number with thousands separators
     function formatNumber(num) {
       if (typeof num !== "number") return num;
       return num.toLocaleString();
@@ -190,7 +194,7 @@
 
     calculateBtn.addEventListener("click", calculate);
 
-    // Optional: allow Enter key
+    // Enter key support
     expressionInput.addEventListener("keyup", (e) => {
       if (e.key === "Enter" && !calculateBtn.disabled) {
         calculate();
